@@ -5,7 +5,8 @@ from .views import (
     CourseEnrollView, SectionCreateView, VideoCreateView, EnrolledCoursesView, TeachingCoursesView,
     MarkVideoWatchedView, SubmitQuizView, CreateQuizView, CreateQuestionView, CreateChoiceView, GetUserQuizScoreView,
     DiscussionListCreateView, CommentCreateView, VoteDiscussionView, VoteCommentView, DiscussionUpdateDeleteView,
-    CommentUpdateDeleteView
+    CommentUpdateDeleteView, DiscussionListView, CommentListView, SubscribeDiscussionView, UnsubscribeDiscussionView,
+    UserSubscribedDiscussionsView
 )
 
 urlpatterns = [
@@ -30,5 +31,10 @@ urlpatterns = [
     path('comments/<int:comment_id>/vote/', VoteCommentView.as_view(), name='vote_comment'),
     path('discussions/<int:pk>/', DiscussionUpdateDeleteView.as_view(), name='discussion_edit_delete'),
     path('comments/<int:pk>/', CommentUpdateDeleteView.as_view(), name='comment_edit_delete'),
+    path('discussions/', DiscussionListView.as_view(), name='discussion_list'),
+    path('comments/', CommentListView.as_view(), name='comment_list'),
+    path('subscribe/', SubscribeDiscussionView.as_view(), name='subscribe_discussion'),
+    path('unsubscribe/<int:discussion_id>/', UnsubscribeDiscussionView.as_view(), name='unsubscribe_discussion'),
+    path('subscriptions/', UserSubscribedDiscussionsView.as_view(), name='user_subscriptions'),
 ]
 

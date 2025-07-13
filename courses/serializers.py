@@ -1,4 +1,5 @@
-from courses.models import Video, Section, Course, VideoProgress, Choice, Question, Quiz, Comment, Discussion, Vote
+from courses.models import Video, Section, Course, VideoProgress, Choice, Question, Quiz, Comment, Discussion, Vote, \
+    DiscussionSubscription
 from user import serializers
 from user.models import UserPublicSerializer
 from user.serializers import UserSerializer
@@ -144,3 +145,16 @@ class VoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
         fields = ['id', 'value']
+
+
+
+class DiscussionSubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DiscussionSubscription
+        fields = ['id', 'user', 'discussion', 'created_at']
+        read_only_fields = ['id', 'created_at', 'user']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        discussion = validated_data['discussion']
+        return DiscussionSubscription.objects.update_or_create(user=user, discussion=discussion)[0]

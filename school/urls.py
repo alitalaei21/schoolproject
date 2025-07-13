@@ -25,6 +25,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('user.urls')),
     path('api/', include('courses.urls')),
+    path('api/notifications/', include('notifications.urls')),
+
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

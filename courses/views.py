@@ -1,14 +1,16 @@
 from django.core.exceptions import ValidationError
 from django.shortcuts import render, get_object_or_404
-from rest_framework import generics, permissions
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics, permissions, filters
 from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from courses.models import Course, Section, Video, Quiz, Choice, QuizResult, Question, Discussion, Vote, Comment
+from courses.models import Course, Section, Video, Quiz, Choice, QuizResult, Question, Discussion, Vote, Comment, \
+    DiscussionSubscription
 from courses.serializers import CourseListSerializer, CourseDetailSerializer, CourseCreateUpdateSerializer, \
     SectionSerializer, VideoSerializer, ChoiceSerializer, QuestionSerializer, QuizSerializer, DiscussionSerializer, \
-    CommentSerializer
+    CommentSerializer, DiscussionSubscriptionSerializer
 
 
 # Create your views here.
@@ -354,3 +356,48 @@ class CommentUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         if self.request.user != instance.user and not self.request.user.is_staff:
             raise PermissionDenied("شما اجازه حذف این نظر را ندارید.")
         instance.delete()
+
+class DiscussionListView(generics.ListAPIView):
+    queryset = Discussion.objects.all().select_related('user', 'course')
+    serializer_class = DiscussionSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['course', 'user']
+    search_fields = ['title', 'content']
+    ordering_fields = ['created_at']
+    ordering = ['-created_at']
+
+class CommentListView(generics.ListAPIView):
+    queryset = Comment.objects.all().select_related('user', 'discussion')
+    serializer_class = CommentSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['discussion', 'user']
+    search_fields = ['content']
+    ordering_fields = ['created_at']
+    ordering = ['created_at']
+
+class SubscribeDiscussionView(generics.CreateAPIView):
+    queryset = DiscussionSubscription.objects.all()
+    serializer_class = DiscussionSubscriptionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class UserSubscribedDiscussionsView(generics.ListAPIView):
+    serializer_class = DiscussionSubscriptionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return DiscussionSubscription.objects.filter(user=self.request.user).select_related('discussion')
+
+class UnsubscribeDiscussionView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, discussion_id):
+        user = request.user
+        try:
+            sub = DiscussionSubscription.objects.get(user=user, discussion_id=discussion_id)
+            sub.delete()
+            return Response({"detail": "Unsubscribed successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except DiscussionSubscription.DoesNotExist:
+            return Response({"detail": "You were not subscribed."}, status=status.HTTP_400_BAD_REQUEST)
