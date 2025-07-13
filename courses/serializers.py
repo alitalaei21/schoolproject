@@ -1,7 +1,7 @@
 from courses.models import Video, Section, Course, VideoProgress, Choice, Question, Quiz, Comment, Discussion, Vote, \
     DiscussionSubscription
 from user import serializers
-from user.models import UserPublicSerializer
+from user.serializers import UserPublicSerializer
 from user.serializers import UserSerializer
 
 
@@ -43,7 +43,7 @@ class CourseCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = ['title', 'description', 'is_vip_only']
-# courses/serializers.py (ادامه)
+
 
 class VideoProgressSerializer(serializers.ModelSerializer):
     class Meta:

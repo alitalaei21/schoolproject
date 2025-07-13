@@ -35,19 +35,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-# users/serializers.py
-
-from rest_framework import serializers
-from .models import User
-
-class UserPublicSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'first_name', 'last_name']
 
 
-    full_name = serializers.SerializerMethodField()
-
-    def get_full_name(self, obj):
-        return f"{obj.first_name} {obj.last_name}".strip()
 

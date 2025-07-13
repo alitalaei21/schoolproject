@@ -45,3 +45,14 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['first_name', 'last_name']
+
+class UserPublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'first_name', 'last_name']
+
+
+    full_name = serializers.SerializerMethodField()
+
+    def get_full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}".strip()
